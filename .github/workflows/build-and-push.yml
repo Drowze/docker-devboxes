@@ -1,0 +1,42 @@
+on:
+  push:
+    branches:
+      - main
+    # paths:
+    #   - debian/Dockerfile
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: docker/login-action@v4
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - uses: docker/setup-qemu-action@v4
+
+      - uses: docker/setup-buildx-action@v4
+
+      - uses: docker/metadata-action@v6
+        id: meta
+        with:
+          images: ${{ vars.DOCKERHUB_USERNAME }}/devbox
+          flavor: |
+            latest=true
+          tags: |
+            type=raw,value=debian
+            type=raw,value=debian-trixie
+
+      - uses: docker/build-push-action@v7
+        with:
+          context: ./debian
+          push: false
+          platforms: linux/amd64,linux/arm64
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
