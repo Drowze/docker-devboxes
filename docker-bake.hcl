@@ -31,4 +31,8 @@ target "debian" {
   labels = {
     "org.opencontainers.image.version" = "debian-${codename}"
   }
+
+  annotations = [
+    "manifest:org.opencontainers.image.version=debian-${codename}"
+  ]
 }
